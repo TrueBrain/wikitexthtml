@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.coverage
+/.env
+/build
+/dist
+/htmlcov
+/wikitexthtml.egg-info
+/VERSION
