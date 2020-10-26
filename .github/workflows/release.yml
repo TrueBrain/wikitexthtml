@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Checkout tags
+      uses: openttd/actions/checkout@v1
+      with:
+        with-tags: true
+
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install twine wheel
+
+    - name: Build
+      run: |
+        python setup.py sdist bdist_wheel
+        version=$(python setup.py --version)
+        echo "::set-output name=archive::"wikitexthtml-${version}.tar.gz""
+        echo "::set-output name=wheel::"wikitexthtml-${version}-py3-none-any.whl""
+      id: build
+
+    - name: Publish to PyPi
+      env:
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        twine upload --username __token__ dist/*.whl dist/*.tar.gz
+
+    - name: Publish Source to GitHub releases
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./dist/${{ steps.build.outputs.archive }}
+        asset_name: ${{ steps.build.outputs.archive }}
+        asset_content_type: application/gzip
+
+    - name: Publish Wheel to GitHub releases
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./dist/${{ steps.build.outputs.wheel }}
+        asset_name: ${{ steps.build.outputs.wheel }}
+        asset_content_type: application/octet-stream
