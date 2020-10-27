@@ -34,4 +34,4 @@ def replace(instance: WikiTextHtml, wikitext: wikitextparser.WikiText):
 
             text = url
 
-        external_link.string = f'<a class="external" href="{url}">{text}</a>{extra}'
+        external_link.string = f'<a class="external" href="{url}" target="_new">{text}</a>{extra}'

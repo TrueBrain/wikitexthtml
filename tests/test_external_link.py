@@ -9,7 +9,9 @@ def test_external_link_with_title():
         def page_exists(self, page: str) -> bool:
             return True
 
-    assert PageTest("Test").render().html == '<a class="external" href="https://www.example.com">Example</a>'
+    assert (
+        PageTest("Test").render().html == '<a class="external" href="https://www.example.com" target="_new">Example</a>'
+    )
 
 
 def test_external_link_without_title():
@@ -20,4 +22,4 @@ def test_external_link_without_title():
         def page_exists(self, page: str) -> bool:
             return True
 
-    assert PageTest("Test").render().html == '<a class="external" href="https://www.example.com">[1]</a>'
+    assert PageTest("Test").render().html == '<a class="external" href="https://www.example.com" target="_new">[1]</a>'
