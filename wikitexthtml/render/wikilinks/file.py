@@ -26,7 +26,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
     else:
         raise NotImplementedError(f"Unknown wikilink file {wikilink.title}")
 
-    url = urllib.parse.unquote(html.escape(filename.replace("%26", "&"))).strip().replace("&amp;", "&")
+    url = filename.strip()
 
     if not instance.file_exists(url):
         log.error("[%s] Upload does not exist: %s", instance.page, wikilink.title)
@@ -39,8 +39,9 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
         "height": None,
         "horizontal": None,
         "alt": None,
-        "link": f"File:{url}",
-        "url": f"File:{url}",
+        "link": instance.file_get_link(url),
+        "url": url,
+        "title": None,
         "vertical": "middle",
         "width": None,
     }  # type: Dict[str, Any]
@@ -48,8 +49,6 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
     magnify = False
     frameless = False
     border = False
-
-    default_alt = url
 
     if wikilink.text:
         # If there is any text, they are parameters divided by |
@@ -97,14 +96,14 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                     width = option
                     options["width"] = int(width)
             elif option.startswith("link="):
-                options["url"] = option[5:]
                 options["link"] = option[5:]
+                options["title"] = option[5:]
 
-                if options["url"].startswith(":"):
-                    options["url"] = options["url"][1:]
+                if options["link"].startswith(":"):
+                    options["link"] = options["link"][1:]
 
-                if options["url"] and not options["url"].startswith(("http://", "https://")):
-                    options["url"] = "/" + urllib.parse.quote(options["url"])
+                if options["link"] and not options["link"].startswith(("http://", "https://")):
+                    options["link"] = "/" + urllib.parse.quote(options["link"])
             elif option.startswith("alt="):
                 options["alt"] = option[4:]
             elif title == "":
@@ -122,20 +121,25 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
     extra_a = ""
     extra_img = ""
 
+    if not title:
+        if options["title"]:
+            title = options["title"]
+        elif not thumb:
+            title = options["link"]
+        else:
+            title = ""
+
     if not frameless:
         extra_a += ' class="image"'
     if is_media:
         extra_a += ' class="internal"'
-        options["url"] = f"/uploads/{url}"
-    if frameless and not title:
-        extra_a += f' title="{html.escape(options["link"])}"'
 
-    if is_image and title and not thumb:
+    if frameless:
+        extra_a += f' title="{html.escape(title)}"'
+    elif is_image and not thumb:
         extra_a += f' title="{html.escape(title)}"'
         if not options["alt"]:
             options["alt"] = title
-    if not options["alt"] and not thumb:
-        options["alt"] = default_alt
 
     if options["width"]:
         extra_img += f' width="{options["width"]}"'
@@ -162,22 +166,30 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
         content = f'<a class="new">{message}</a>'
     else:
         if is_image:
-            content = f'<img src="/uploads/{url}"{extra_img} />'
+            if thumb:
+                # TODO -- What is the default value for this?
+                thumb_width = options["width"]
+            else:
+                thumb_width = None
+
+            img = instance.file_get_img(url, thumb=thumb_width)
+            content = f'<img src="{img}"{extra_img} />'
         else:
             content = title
-        if options["url"]:
-            if options["url"].startswith(("http://", "https://")):
-                content = f'[{options["url"]} {content}]'
-            else:
-                content = f'<a href="{options["url"]}"{extra_a}>{content}</a>'
+
+        if options["link"].startswith(("http://", "https://")):
+            content = f'[{options["link"]} {content}]'
+        else:
+            content = f'<a href="{options["link"]}"{extra_a}>{content}</a>'
         # TODO -- If thumb, load a thumb-url, not the full image
-        # TODO -- /uploads/ should be requested from "instance" object
 
     if thumb:
-        content += '  <div class="thumbcaption">'
-        if magnify and not file_not_found:
-            content += f'<div class="magnify"><a href="/File:{url}" class="internal" title="Enlarge">🔍</a></div>'
-        content += f"{title}</div>\n"
+        if title:
+            content += '  <div class="thumbcaption">'
+            if magnify and not file_not_found:
+                content_magnify = f'<a href="{options["link"]}" class="internal" title="Enlarge">🔍</a>'
+                content += f'<div class="magnify">{content_magnify}</div>'
+            content += f"{title}</div>\n"
 
         style = ""
         if options["width"]:
