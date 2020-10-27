@@ -32,6 +32,14 @@ class WikiTextHtml:
         """Clean "title" (which is a full pagename) to become more human readable."""
         raise NotImplementedError
 
+    def file_get_link(self, url: str) -> str:
+        """Get the link to a file (for the "a href" of the File)."""
+        raise NotImplementedError
+
+    def file_get_img(self, url: str, thumb: Optional[int]) -> str:
+        """Get the "img src" to a file. If thumb is set, a thumb should be generated of that size."""
+        raise NotImplementedError
+
     def store_snippet(self, snippet: str) -> int:
         # Will be implemented by Page and merely here to make MyPy happy.
         raise NotImplementedError
