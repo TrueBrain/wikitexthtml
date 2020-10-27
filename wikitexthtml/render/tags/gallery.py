@@ -1,6 +1,9 @@
+import logging
 import wikitextparser
 
 from ...prototype import WikiTextHtml
+
+log = logging.getLogger(__name__)
 
 
 def hook(instance: WikiTextHtml, tag: wikitextparser.Tag):
@@ -39,30 +42,32 @@ def hook(instance: WikiTextHtml, tag: wikitextparser.Tag):
     if caption:
         content += f'<li class="gallerycaption">{caption}</li>\n'
 
+    if heights is None:
+        heights = widths
+
     items = tag.contents.split("\n")
     for item in items:
         if not item:
             continue
 
         image, _, title = item.partition("|")
-        if image.lower().startswith("image:"):
-            image = f"file:{image[6:]}"
-        if image.lower().startswith("file:"):
-            image = image[5:]
-        image = image.replace(" ", "_")
+        if not image.lower().startswith("file:"):
+            log.error(f"Unsupported entry in gallery tag: {image}")
+            continue
+        image = image[5:]
         url = image
 
-        if heights:
-            content_item = f'<img src="/uploads/{url}" height="{heights}" />\n'
-        else:
-            content_item = f'<img src="/uploads/{url}" />\n'
+        content_item = f'<img src="/uploads/{url}" style="max-width: {widths}px; max-height: {heights}px;" />\n'
         content_item = f'<a href="/File:{image}">\n{content_item}</a>\n'
         content_item = f'<div style="margin: 10px auto;">\n{content_item}</div>\n'
-        content_item = f'<div class="thumb" style="width: {widths + 30}px">\n{content_item}</div>\n'
+
+        style = f'style="width: {widths + 30}px; height: {heights + 30}px;"'
+        content_item = f'<div class="thumb" {style}>\n{content_item}</div>\n'
+
         content_item += f'<div class="gallerytext">{title}</div>\n'
 
         content_item = f'<div style="width: {widths + 35}px">\n{content_item}</div>\n'
-        content += f'<li class="gallerybox" style="width: {widths + 35}px">\n{content_item}</li>\n'
+        content += f'<li class="gallerybox" style="width: {widths + 35}px;">\n{content_item}</li>\n'
 
     content += "</ul>\n"
     return content
