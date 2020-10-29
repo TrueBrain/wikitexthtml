@@ -14,6 +14,8 @@ log = logging.getLogger(__name__)
 def _render_template(instance: WikiTextHtml, template: wikitextparser.Template):
     name = template.name.strip()
 
+    instance._templates.add(name)
+
     if not instance.template_exists(name):
         template.string = f'<a href="/{name}" title="{name}">{name}</a>'
         return
