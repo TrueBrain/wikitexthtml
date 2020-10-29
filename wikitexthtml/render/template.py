@@ -1,4 +1,3 @@
-import logging
 import wikitextparser
 
 from . import (
@@ -7,8 +6,6 @@ from . import (
     parser_function,
 )
 from ..prototype import WikiTextHtml
-
-log = logging.getLogger(__name__)
 
 
 def _render_template(instance: WikiTextHtml, template: wikitextparser.Template):

@@ -1,11 +1,8 @@
 import html
-import logging
 import wikitextparser
 
 from . import list_
 from ..prototype import WikiTextHtml
-
-log = logging.getLogger(__name__)
 
 
 def _render_table(instance: WikiTextHtml, table: wikitextparser.Table):
@@ -15,9 +12,8 @@ def _render_table(instance: WikiTextHtml, table: wikitextparser.Table):
         if attr == "style":
             style = html.escape(value, quote=False).replace('"', "'").strip()
             if not style:
-                raise RuntimeError(f"Table attribute {attr} has an empty value, which was not expected")
-
-            if style[-1] != ";":
+                instance.add_error(f"Table attribute '{attr}' has an empty value, which was not expected")
+            elif not style.endswith(";"):
                 style += ";"
             table_style += f"{style} "
         elif attr in (
@@ -32,14 +28,14 @@ def _render_table(instance: WikiTextHtml, table: wikitextparser.Table):
         ):
             value = html.escape(value).strip()
             if not value:
-                log.error(f"Table attribute {attr} has an empty value, which was not expected")
+                instance.add_error(f"Table attribute '{attr}' has an empty value, which was not expected")
             else:
                 table_extra += f' {attr}="{value}"'
         elif attr in ("bordercolor", "padding"):
             # Nobody likes these attributes; just ignore it
             pass
         else:
-            log.error(f"Table attribute {attr} not yet implemented")
+            instance.add_error(f"Table attribute '{attr}' is not a valid attribute")
 
     if table_style:
         table_style = f' style="{table_style[:-1]}"'
@@ -66,21 +62,20 @@ def _render_table(instance: WikiTextHtml, table: wikitextparser.Table):
                 if attr == "style":
                     style = html.escape(value, quote=False).replace('"', "'").strip()
                     if not style:
-                        raise RuntimeError(f"Cell attribute {attr} has an empty value, which was not expected")
-
-                    if style[-1] != ";":
+                        instance.add_error(f"Cell attribute '{attr}' has an empty value, which was not expected")
+                    elif not style.endswith(";"):
                         style += ";"
                     cell_style += f"{style} "
                 elif attr in ("align", "bgcolor", "class", "colspan", "height", "rowspan", "scope", "valign", "width"):
                     value = html.escape(value).strip()
                     if not value:
-                        raise RuntimeError(f"Cell attribute {attr} has an empty value, which was not expected")
-
-                    cell_extra += f' {attr}="{value}"'
+                        instance.add_error(f"Cell attribute '{attr}' has an empty value, which was not expected")
+                    else:
+                        cell_extra += f' {attr}="{value}"'
                 elif attr in ("nowrap",):
                     cell_extra += f" {attr}"
                 else:
-                    log.error(f"Cell attribute {attr} not yet implemented")
+                    instance.add_error(f"Cell attribute '{attr}' is not a valid attribute")
 
             if cell_style:
                 cell_style = f' style="{cell_style[:-1]}"'

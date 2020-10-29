@@ -1,4 +1,3 @@
-import logging
 import wikitextparser
 
 from .parser_functions import (
@@ -13,8 +12,6 @@ from .parser_functions import (
     variables,
 )
 from ..prototype import WikiTextHtml
-
-log = logging.getLogger(__name__)
 
 
 PARSER_FUNCTIONS = {
@@ -42,7 +39,8 @@ def replace(instance: WikiTextHtml, wikitext: wikitextparser.WikiText):
     for parser_function in reversed(wikitext.parser_functions):
         name = parser_function.name.lower().strip()
 
-        if name in PARSER_FUNCTIONS:
-            PARSER_FUNCTIONS[name](instance, parser_function)
-        else:
-            log.error(f"Unknown parser function {parser_function.name}")
+        if name not in PARSER_FUNCTIONS:
+            instance.add_error(f"Parser function '{parser_function.name}' does not exist")
+            continue
+
+        PARSER_FUNCTIONS[name](instance, parser_function)
