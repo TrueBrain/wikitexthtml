@@ -1,6 +1,9 @@
 import wikitextparser
 
-from typing import List
+from typing import (
+    List,
+    Set,
+)
 
 from .prototype import WikiTextHtml
 from .render import (
@@ -23,6 +26,7 @@ class Page(WikiTextHtml):
     def __init__(self, page: str) -> None:
         self._page = page
         self._snippet = []  # type: List[str]
+        self._templates = set()  # type: Set[str]
 
     def prepare(self, body) -> wikitextparser.WikiText:
         body = preprocess.begin(self, body)
@@ -82,14 +86,6 @@ class Page(WikiTextHtml):
         self._snippet.append(snippet)
         return len(self._snippet) - 1
 
-    @property
-    def html(self):
-        return self._html
-
-    @property
-    def page(self):
-        return self._page
-
     def _replace_snippets(self, wikitext: wikitextparser.WikiText, stage: str):
         for template_ in reversed(wikitext.templates):
             if template_.arguments[0].value != stage:
@@ -98,3 +94,15 @@ class Page(WikiTextHtml):
             index = int(template_.arguments[1].value)
             template_.string = self._snippet[index]
             self._replace_snippets(template_, stage)
+
+    @property
+    def html(self):
+        return self._html
+
+    @property
+    def page(self):
+        return self._page
+
+    @property
+    def templates(self):
+        return self._templates
