@@ -1,10 +1,7 @@
 import html
-import logging
 import wikitextparser
 
 from ...prototype import WikiTextHtml
-
-log = logging.getLogger(__name__)
 
 
 def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
@@ -24,8 +21,8 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
 
     link_extra = ""
 
-    if not instance.page_exists(url):
-        log.error("[%s] Page does not exist: %s", instance._page, title)
+    if url and not instance.page_exists(url):
+        instance.add_error(f"Linked page '{title}' does not exist")
         link_extra = ' class="new"'
 
     hash = ""

@@ -1,9 +1,6 @@
-import logging
 import wikitextparser
 
 from ...prototype import WikiTextHtml
-
-log = logging.getLogger(__name__)
 
 
 def hook(instance: WikiTextHtml, tag: wikitextparser.Tag):
@@ -17,22 +14,22 @@ def hook(instance: WikiTextHtml, tag: wikitextparser.Tag):
             if value.endswith("px"):
                 value = value[:-2]
             if not value.isnumeric():
-                raise NotImplementedError(f"Gallery attribute {attr} is not in pixels: {value}")
+                instance.add_error(f"Gallery attribute '{attr}' is not in pixels: {value}")
             if attr == "widths":
                 widths = int(value)
             else:
                 heights = int(value)
         elif attr == "perrow":
             if not value.isnumeric():
-                raise NotImplementedError(f"Gallery attribute perrow is not a number: {value}")
+                instance.add_error(f"Gallery attribute '{attr}' is not in a number: {value}")
             perrow = int(value)
         elif attr == "caption":
             caption = value
         elif attr == "mode":
             if value != "traditional":
-                raise NotImplementedError(f"Gallery attribute mode has on traditional implemented; requested: {value}")
+                instance.add_error(f"Gallery attribute '{attr}' has an unsupported value: {value}")
         else:
-            raise NotImplementedError(f"Gallery attribute {attr} not yet implemented")
+            instance.add_error(f"Gallery attribute '{attr}' is not a valid attribute")
 
     if perrow:
         max_width = perrow * (widths + 43)
@@ -52,7 +49,7 @@ def hook(instance: WikiTextHtml, tag: wikitextparser.Tag):
 
         image, _, title = item.partition("|")
         if not image.lower().startswith("file:"):
-            log.error(f"Unsupported entry in gallery tag: {image}")
+            instance.add_error(f"Gallery entry '{image}' is not a valid gallery entry")
             continue
         image = image[5:]
         url = image

@@ -1,5 +1,4 @@
 import html
-import logging
 import urllib
 import wikitextparser
 
@@ -9,8 +8,6 @@ from typing import (
 )
 
 from ...prototype import WikiTextHtml
-
-log = logging.getLogger(__name__)
 
 
 def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
@@ -29,7 +26,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
     url = filename.strip()
 
     if not instance.file_exists(url):
-        log.error("[%s] Upload does not exist: %s", instance.page, wikilink.title)
+        instance.add_error(f"Upload '{wikilink.title}' does not exist")
         file_not_found = True
     else:
         file_not_found = False
@@ -62,11 +59,9 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                 if options["horizontal"] is None:
                     options["horizontal"] = option
                 else:
-                    log.error(
-                        "[%s] Horizontal alignment set to both '%s' and '%s'",
-                        instance.page,
-                        option,
-                        options["horizontal"],
+                    instance.add_error(
+                        f"Horizontal alignment set to both '{option}' and '{options['horizontal']}'. ' \
+                        'Please set either one"
                     )
             elif option in ("baseline", "sub", "super", "top", "text-top", "middle", "bottom", "text-bottom"):
                 options["vertical"] = option
@@ -82,7 +77,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                     previous_option = "frame"
                     if magnify:
                         previous_option = "thumb"
-                    log.error("[%s] Image sets both '%s' and '%s'", instance.page, option, previous_option)
+                    instance.add_error(f"Image sets both '{option}' as '{previous_option}'. Please set either one")
             elif option == "border":
                 border = True
             elif option.endswith("px"):
@@ -110,8 +105,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                 # Anything we don't understand has to be the title .. we hope
                 title = raw_option.strip()
             else:
-                log.error("[%s] either '%s' or '%s' is not a valid image option", instance.page, title, option)
-                # TODO -- Return error to user
+                instance.add_error(f"Image option '{title}' or '{option}' is not a valid option")
 
                 # We cannot tell which of the two was meant to the the title.
                 # We pick the last option we saw as a title, and throw an

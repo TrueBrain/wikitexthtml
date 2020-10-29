@@ -27,6 +27,7 @@ class Page(WikiTextHtml):
         self._page = page
         self._snippet = []  # type: List[str]
         self._templates = set()  # type: Set[str]
+        self._errors = []  # type: List[str]
 
     def prepare(self, body) -> wikitextparser.WikiText:
         body = preprocess.begin(self, body)
@@ -95,6 +96,9 @@ class Page(WikiTextHtml):
             template_.string = self._snippet[index]
             self._replace_snippets(template_, stage)
 
+    def add_error(self, error: str):
+        self._errors.append(error)
+
     @property
     def html(self):
         return self._html
@@ -106,3 +110,7 @@ class Page(WikiTextHtml):
     @property
     def templates(self):
         return self._templates
+
+    @property
+    def errors(self):
+        return self._errors
