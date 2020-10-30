@@ -22,7 +22,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
     link_extra = ""
 
     if url and not instance.page_exists(url):
-        instance.add_error(f"Linked page '{title}' does not exist")
+        instance.add_error(f"Linked page '{wikilink.title}' does not exist")
         link_extra = ' class="new"'
 
     hash = ""
