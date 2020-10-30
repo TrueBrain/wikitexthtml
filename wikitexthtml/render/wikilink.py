@@ -14,7 +14,7 @@ WIKILINK_NAMESPACES = {
 
 def replace(instance: WikiTextHtml, wikitext: wikitextparser.WikiText):
     for wikilink in reversed(wikitext.wikilinks):
-        title = wikilink.title.lower().strip()
+        title = wikilink.title.lower()
 
         if "{{{" in title:
             # This means there was a parameter that could not be resolved;

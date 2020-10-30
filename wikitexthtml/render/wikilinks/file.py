@@ -60,8 +60,8 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                     options["horizontal"] = option
                 else:
                     instance.add_error(
-                        f"Horizontal alignment set to both '{option}' and '{options['horizontal']}'. ' \
-                        'Please set either one"
+                        f"Horizontal alignment set to both '{option}' and '{options['horizontal']}'; "
+                        "please set either one"
                     )
             elif option in ("baseline", "sub", "super", "top", "text-top", "middle", "bottom", "text-bottom"):
                 options["vertical"] = option
@@ -77,7 +77,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                     previous_option = "frame"
                     if magnify:
                         previous_option = "thumb"
-                    instance.add_error(f"Image sets both '{option}' as '{previous_option}'. Please set either one")
+                    instance.add_error(f"Image sets both '{option}' as '{previous_option}'; please set either one")
             elif option == "border":
                 border = True
             elif option.endswith("px"):
