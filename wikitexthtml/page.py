@@ -42,14 +42,7 @@ class Page(WikiTextHtml):
 
         return wikitextparser.parse(wtp.string)
 
-    def render(self) -> "Page":
-        if not self.page_exists(self._page):
-            self._html = f"<h2>Page {self._page} not found</h2>"
-            return self
-
-        body = self.page_load(self._page)
-        wtp = self.prepare(body)
-
+    def render_page(self, wtp: wikitextparser.WikiText) -> str:
         tag.call_hooks(self, wtp)
 
         # Order is important. Lists inside tables will be rendered by the
@@ -80,7 +73,16 @@ class Page(WikiTextHtml):
 
         section.replace(self, wtp)
 
-        self._html = postprocess.replace(self, wtp.string)
+        return postprocess.replace(self, wtp.string)
+
+    def render(self, body: str = None) -> "Page":
+        if not self.page_exists(self._page):
+            self._html = f"<h2>Page {self._page} not found</h2>"
+            return self
+
+        body = self.page_load(self._page)
+        wtp = self.prepare(body)
+        self._html = self.render_page(wtp)
         return self
 
     def store_snippet(self, snippet):
