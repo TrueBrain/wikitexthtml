@@ -14,14 +14,9 @@ def _render_template(instance: WikiTextHtml, template: wikitextparser.Template):
     instance._templates.add(name)
 
     if not instance.template_exists(name):
-        template.string = f'<a href="/{name}" title="{name}">{name}</a>'
-        return
+        instance.add_error(f"Template '{name}' does not exist")
 
     body = instance.template_load(name)
-    if body is None:
-        template.string = f"Template {name} could not be loaded"
-        return
-
     body = preprocess.begin(instance, body, is_transcluding=True)
     body = preprocess.hr_line(instance, body)
 
