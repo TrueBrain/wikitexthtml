@@ -14,8 +14,7 @@ def _lookup_nth_positional(function_arguments: List[wikitextparser.Argument], in
         index -= 1
         if index == 0:
             return function_argument.value
-    else:
-        return None
+    return None
 
 
 def _lookup_named(function_arguments: List[wikitextparser.Argument], name):
@@ -25,8 +24,7 @@ def _lookup_named(function_arguments: List[wikitextparser.Argument], name):
 
         if function_argument.name.strip() == name:
             return function_argument.value
-    else:
-        return None
+    return None
 
 
 def replace(
