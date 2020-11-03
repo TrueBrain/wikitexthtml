@@ -173,7 +173,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
 
         if options["link"].startswith(("http://", "https://")):
             content = f'[{options["link"]} {content}]'
-        else:
+        elif options["link"]:
             content = f'<a href="{options["link"]}"{extra_a}>{content}</a>'
         # TODO -- If thumb, load a thumb-url, not the full image
 
