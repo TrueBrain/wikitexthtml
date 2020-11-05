@@ -26,7 +26,7 @@ def replace(instance: WikiTextHtml, wikitext: wikitextparser.WikiText):
             namespace, _, _ = title.rpartition(":")
             if namespace:
                 if namespace not in WIKILINK_NAMESPACES:
-                    instance.add_error(f"Namespace '{namespace}' in wikilink is an unknown namespace")
+                    instance.add_error(f"Namespace '{namespace}' in wikilink '{wikilink.title}' is an unknown namespace")
                     continue
 
                 if WIKILINK_NAMESPACES[namespace](instance, wikilink):
