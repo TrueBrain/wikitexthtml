@@ -60,7 +60,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                     options["horizontal"] = option
                 else:
                     instance.add_error(
-                        f"Horizontal alignment set to both '{option}' and '{options['horizontal']}'; "
+                        f"Image '{wikilink.title}' sets both '{option}' and '{options['horizontal']}'; "
                         "please set either one"
                     )
             elif option in ("baseline", "sub", "super", "top", "text-top", "middle", "bottom", "text-bottom"):
@@ -77,7 +77,10 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                     previous_option = "frame"
                     if magnify:
                         previous_option = "thumb"
-                    instance.add_error(f"Image sets both '{option}' as '{previous_option}'; please set either one")
+                    instance.add_error(
+                        f"Image '{wikilink.title}' sets both '{option}' as '{previous_option}'; "
+                        "please set either one"
+                    )
             elif option == "border":
                 border = True
             elif option.endswith("px"):
@@ -105,7 +108,10 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                 # Anything we don't understand has to be the title .. we hope
                 title = raw_option.strip()
             else:
-                instance.add_error(f"Image option '{title}' or '{option}' is not a valid option")
+                instance.add_error(
+                    f"Image '{wikilink.title}' has option '{title}' and '{option}'; "
+                    "either one of them is not a valid option"
+                )
 
                 # We cannot tell which of the two was meant to the the title.
                 # We pick the last option we saw as a title, and throw an
