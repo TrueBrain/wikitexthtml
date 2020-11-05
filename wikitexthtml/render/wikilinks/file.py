@@ -187,7 +187,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
 
         style = ""
         if options["width"]:
-            style = f'width:{options["width"] + 2}px;'
+            style = f'width: {options["width"] + 2}px;'
 
         if style:
             style = f' style="{style}"'
