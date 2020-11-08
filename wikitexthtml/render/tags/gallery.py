@@ -1,3 +1,4 @@
+import urllib
 import wikitextparser
 
 from ...prototype import WikiTextHtml
@@ -52,10 +53,15 @@ def hook(instance: WikiTextHtml, tag: wikitextparser.Tag):
             instance.add_error(f"Gallery entry '{image}' is not a valid gallery entry")
             continue
         image = image[5:]
-        url = image
 
-        content_item = f'<img src="/uploads/{url}" style="max-width: {widths}px; max-height: {heights}px;" />\n'
-        content_item = f'<a href="/File:{image}">\n{content_item}</a>\n'
+        url = instance.file_get_link(image)
+        url = urllib.parse.quote(url)
+
+        img = instance.file_get_img(image)
+        img = urllib.parse.quote(img)
+
+        content_item = f'<img src="{img}" style="max-width: {widths}px; max-height: {heights}px;" />\n'
+        content_item = f'<a href="{url}">\n{content_item}</a>\n'
         content_item = f'<div style="margin: 10px auto;">\n{content_item}</div>\n'
 
         style = f'style="width: {widths + 30}px; height: {heights + 30}px;"'
