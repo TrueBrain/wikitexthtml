@@ -101,7 +101,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                     options["link"] = options["link"][1:]
 
                 if options["link"] and not options["link"].startswith(("http://", "https://")):
-                    options["link"] = "/" + urllib.parse.quote(options["link"])
+                    options["link"] = f"/{options['link']}"
             elif option.startswith("alt="):
                 options["alt"] = option[4:]
             elif title == "":
@@ -173,6 +173,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                 thumb_width = None
 
             img = instance.file_get_img(url, thumb=thumb_width)
+            img = urllib.parse.quote(img)
             content = f'<img src="{img}"{extra_img} />'
         else:
             content = title
@@ -180,14 +181,16 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
         if options["link"].startswith(("http://", "https://")):
             content = f'[{options["link"]} {content}]'
         elif options["link"]:
-            content = f'<a href="{options["link"]}"{extra_a}>{content}</a>'
+            href = urllib.parse.quote(options["link"])
+            content = f'<a href="{href}"{extra_a}>{content}</a>'
         # TODO -- If thumb, load a thumb-url, not the full image
 
     if thumb:
         if title:
             content += '  <div class="thumbcaption">'
             if magnify and not file_not_found:
-                content_magnify = f'<a href="{options["link"]}" class="internal" title="Enlarge">🔍</a>'
+                href = urllib.parse.quote(options["link"])
+                content_magnify = f'<a href="{href}" class="internal" title="Enlarge">🔍</a>'
                 content += f'<div class="magnify">{content_magnify}</div>'
             content += f"{title}</div>\n"
 

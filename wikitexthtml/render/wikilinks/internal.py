@@ -1,4 +1,5 @@
 import html
+import urllib
 import wikitextparser
 
 from ...prototype import WikiTextHtml
@@ -14,6 +15,9 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
             text += f"#{wikilink.fragment}"
     else:
         text = wikilink.text.strip()
+
+    title = html.escape(title)
+    text = html.escape(text)
 
     if url == instance._page and not wikilink.fragment:
         wikilink.string = f'<strong class="selflink">{text}</strong>'
@@ -33,7 +37,6 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
     url = instance.clean_url(url)
 
     if url:
-        url = f"/{html.escape(url)}"
+        url = f"/{urllib.parse.quote(url)}"
 
-    title = html.escape(title)
     wikilink.string = f'<a href="{url}{hash}"{link_extra} title="{title}">{text}</a>'
