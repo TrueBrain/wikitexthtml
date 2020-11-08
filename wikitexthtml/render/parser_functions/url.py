@@ -1,3 +1,4 @@
+import html
 import urllib
 import wikitextparser
 
@@ -6,16 +7,14 @@ from .helpers import get_argument
 from ...prototype import WikiTextHtml
 
 
-def localurl(instance: WikiTextHtml, parser_function: wikitextparser.ParserFunction):
-    if len(parser_function.arguments) not in (1, 2):
+def encode(instance: WikiTextHtml, parser_function: wikitextparser.ParserFunction):
+    if len(parser_function.arguments) != 1:
         raise ParserFunctionWrongArgumentCount
 
-    local_page = get_argument(parser_function, 0).strip()
-    query_string = get_argument(parser_function, 1).strip()
+    url = get_argument(parser_function, 0).strip()
 
-    if query_string:
-        query_string = f"?{query_string}"
+    # All variables should already be HTML escaped, so unescape first,
+    # as otherwise we are double encoding them.
+    url = urllib.parse.quote(html.unescape(url))
 
-    local_page = urllib.parse.quote(local_page)
-
-    parser_function.string = f"/{local_page}{query_string}"
+    parser_function.string = url

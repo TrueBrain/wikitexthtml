@@ -1,4 +1,5 @@
 import datetime
+import html
 import wikitextparser
 
 from .exceptions import ParserFunctionWrongArgumentCount
@@ -13,8 +14,8 @@ def variable(instance: WikiTextHtml, parser_function: wikitextparser.ParserFunct
     if name == "currentyear":
         parser_function.string = str(datetime.datetime.now().year)
     elif name in ("pagename", "fullpagename", "basepagename"):
-        parser_function.string = instance.page
+        parser_function.string = html.escape(instance.page)
     elif name == "subpagename":
-        parser_function.string = instance.clean_title(instance.page)
+        parser_function.string = html.escape(instance.clean_title(instance.page))
     elif name == "namespace":
         parser_function.string = ""

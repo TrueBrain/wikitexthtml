@@ -26,12 +26,12 @@ PARSER_FUNCTIONS = {
     "fullpagename": variables.variable,
     "lc": string.lc,
     "lcfirst": string.lcfirst,
-    "localurl": url.localurl,
     "namespace": variables.variable,
     "pagename": variables.variable,
     "subpagename": variables.variable,
     "uc": string.uc,
     "ucfirst": string.ucfirst,
+    "urlencode": url.encode,
 }
 
 
