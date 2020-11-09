@@ -33,6 +33,10 @@ def replace(instance: WikiTextHtml, wikitext: wikitextparser.WikiText):
 
                 if WIKILINK_NAMESPACES[namespace](instance, wikilink):
                     continue
+            elif ":" in title:
+                # The wikilink starts with a :; this has the same meaning as
+                # no :, so strip it and the rest will do its thing correctly.
+                wikilink.title = wikilink.title[1:]
 
             internal.replace(instance, wikilink)
 
