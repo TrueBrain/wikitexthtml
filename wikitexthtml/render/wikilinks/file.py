@@ -160,10 +160,12 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
 
     if file_not_found:
         if not title or thumb:
-            message = wikilink.title.replace("_", " ")
+            message = wikilink.title
         else:
             message = title
-        content = f'<a class="new">{message}</a>'
+
+        href = urllib.parse.quote(instance.file_get_link(url))
+        content = f'<a href="{href}" class="new">{message}</a>'
     else:
         if is_image:
             if thumb:
