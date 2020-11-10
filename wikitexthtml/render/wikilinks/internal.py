@@ -2,12 +2,18 @@ import html
 import urllib
 import wikitextparser
 
+from ...exceptions import InvalidWikiLink
 from ...prototype import WikiTextHtml
 
 
 def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
     url = wikilink.title.strip()
-    title = instance.clean_title(url)
+    try:
+        title = instance.clean_title(url)
+    except InvalidWikiLink as e:
+        # Errors always end with a dot, hence the [:-1].
+        instance.add_error(f'{e.args[0][:-1]} (wikilink "{wikilink.string}").')
+        return
 
     if wikilink.text is None:
         text = title
@@ -26,7 +32,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
     link_extra = ""
 
     if url and not instance.page_exists(url):
-        instance.add_error(f"Linked page '{wikilink.title}' does not exist")
+        instance.add_error(f'Linked page "{wikilink.title}"" does not exist (wikilink "{wikilink.string}").')
         link_extra = ' class="new"'
 
     hash = ""

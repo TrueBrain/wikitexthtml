@@ -3,6 +3,7 @@ import html
 import wikitextparser
 
 from .exceptions import ParserFunctionWrongArgumentCount
+from ...exceptions import InvalidWikiLink
 from ...prototype import WikiTextHtml
 
 
@@ -16,6 +17,11 @@ def variable(instance: WikiTextHtml, parser_function: wikitextparser.ParserFunct
     elif name in ("pagename", "fullpagename", "basepagename"):
         parser_function.string = html.escape(instance.page)
     elif name == "subpagename":
-        parser_function.string = html.escape(instance.clean_title(instance.page))
+        try:
+            parser_function.string = html.escape(instance.clean_title(instance.page))
+        except InvalidWikiLink as e:
+            # Errors always end with a dot, hence the [:-1].
+            instance.add_error(f'{e.args[0][:-1]} (parserfunction "{parser_function.string}").')
+            parser_function.string = ""
     elif name == "namespace":
         parser_function.string = ""

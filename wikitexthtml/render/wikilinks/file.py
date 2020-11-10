@@ -7,6 +7,7 @@ from typing import (
     Dict,
 )
 
+from ...exceptions import InvalidWikiLink
 from ...prototype import WikiTextHtml
 
 
@@ -25,11 +26,16 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
 
     url = filename.strip()
 
-    if not instance.file_exists(url):
-        instance.add_error(f"Upload '{wikilink.title}' does not exist")
-        file_not_found = True
-    else:
-        file_not_found = False
+    try:
+        if not instance.file_exists(url):
+            instance.add_error(f'Upload "{wikilink.title}" does not exist (wikilink "{wikilink.string}").')
+            file_not_found = True
+        else:
+            file_not_found = False
+    except InvalidWikiLink as e:
+        # Errors always end with a dot, hence the [:-1].
+        instance.add_error(f'{e.args[0][:-1]} (wikilink "{wikilink.string}").')
+        return True
 
     title = ""
     options = {
@@ -60,8 +66,8 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                     options["horizontal"] = option
                 else:
                     instance.add_error(
-                        f"Image '{wikilink.title}' sets both '{option}' and '{options['horizontal']}'; "
-                        "please set either one"
+                        f'Image "{wikilink.title}" sets both "{option}" and "{options["horizontal"]}"; '
+                        f'please set either one (wikilink "{wikilink.string}").'
                     )
             elif option in ("baseline", "sub", "super", "top", "text-top", "middle", "bottom", "text-bottom"):
                 options["vertical"] = option
@@ -78,8 +84,8 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                     if magnify:
                         previous_option = "thumb"
                     instance.add_error(
-                        f"Image '{wikilink.title}' sets both '{option}' as '{previous_option}'; "
-                        "please set either one"
+                        f'Image "{wikilink.title}" sets both "{option}" as "{previous_option}"; '
+                        f'please set either one (wikilink "{wikilink.string}").'
                     )
             elif option == "border":
                 border = True
@@ -109,8 +115,8 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                 title = raw_option.strip()
             else:
                 instance.add_error(
-                    f"Image '{wikilink.title}' has option '{title}' and '{option}'; "
-                    "either one of them is not a valid option"
+                    f'Image "{wikilink.title}" has option "{title}" and "{option}"; '
+                    f'either one of them is not a valid option (wikilink "{wikilink.string}").'
                 )
 
                 # We cannot tell which of the two was meant to the the title.
@@ -159,13 +165,8 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
         extra_img += f' alt="{html.escape(options["alt"])}"'
 
     if file_not_found:
-        if not title or thumb:
-            message = wikilink.title
-        else:
-            message = title
-
         href = urllib.parse.quote(instance.file_get_link(url))
-        content = f'<a href="{href}" class="new">{message}</a>'
+        content = f'<a href="{href}" class="new">{wikilink.title}</a>'
     else:
         if is_image:
             if thumb:

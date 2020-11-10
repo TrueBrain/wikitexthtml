@@ -87,6 +87,8 @@ class Page(WikiTextHtml):
 
     def _replace_snippets(self, wikitext: wikitextparser.WikiText, stage: str):
         for template_ in reversed(wikitext.templates):
+            if template_.name != "__snippet":
+                continue
             if template_.arguments[0].value != stage:
                 continue
 
