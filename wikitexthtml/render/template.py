@@ -20,7 +20,12 @@ def _render_template(instance: WikiTextHtml, template: wikitextparser.Template):
         instance.add_error(f'{e.args[0][:-1]} (template "{{{{{name}}}}}").')
         return
 
-    instance._templates.add(name)
+    instance._templates[name] += 1
+    if instance._templates[name] > 10:
+        instance.add_error(
+            f'Template "{name}" transcluded more than 10 times on the same Page (recursion limit reached).'
+        )
+        return
 
     body = instance.template_load(name)
     body = preprocess.begin(instance, body, is_transcluding=True)

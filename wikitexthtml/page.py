@@ -1,8 +1,9 @@
 import wikitextparser
 
+from collections import defaultdict
 from typing import (
+    Dict,
     List,
-    Set,
 )
 
 from .prototype import WikiTextHtml
@@ -26,7 +27,7 @@ class Page(WikiTextHtml):
     def __init__(self, page: str) -> None:
         self._page = page
         self._snippet = []  # type: List[str]
-        self._templates = set()  # type: Set[str]
+        self._templates = defaultdict(int)  # type: Dict[str, int]
         self._errors = []  # type: List[str]
 
     def prepare(self, body) -> wikitextparser.WikiText:
@@ -109,7 +110,7 @@ class Page(WikiTextHtml):
 
     @property
     def templates(self):
-        return self._templates
+        return self._templates.keys()
 
     @property
     def errors(self):
