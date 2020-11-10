@@ -20,12 +20,13 @@ def _render_template(instance: WikiTextHtml, template: wikitextparser.Template):
         instance.add_error(f'{e.args[0][:-1]} (template "{{{{{name}}}}}").')
         return
 
-    instance._templates[name] += 1
-    if instance._templates[name] > 10:
+    instance._templates.add(name)
+    if instance._template_path.count(name) >= 10:
         instance.add_error(
-            f'Template "{name}" transcluded more than 10 times on the same Page (recursion limit reached).'
+            f'Template "{name}" was transcluded itself more than ten times (recursion depth limit reached).'
         )
         return
+    instance._template_path.append(name)
 
     body = instance.template_load(name)
     body = preprocess.begin(instance, body, is_transcluding=True)
@@ -38,6 +39,8 @@ def _render_template(instance: WikiTextHtml, template: wikitextparser.Template):
     replace(instance, wtp)
 
     template.string = wtp.string
+
+    instance._template_path.remove(name)
 
 
 def replace(instance: WikiTextHtml, wikitext: wikitextparser.WikiText, parent: wikitextparser.WikiText = None):
