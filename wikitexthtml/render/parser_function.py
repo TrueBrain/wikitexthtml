@@ -40,7 +40,7 @@ def replace(instance: WikiTextHtml, wikitext: wikitextparser.WikiText):
         name = parser_function.name.lower().strip()
 
         if name not in PARSER_FUNCTIONS:
-            instance.add_error(f"Parser function '{parser_function.name}' does not exist")
+            instance.add_error(f'Parser function "{parser_function.name}" does not exist.')
             continue
 
         PARSER_FUNCTIONS[name](instance, parser_function)

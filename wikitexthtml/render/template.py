@@ -5,16 +5,22 @@ from . import (
     parameter,
     parser_function,
 )
+from ..exceptions import InvalidTemplate
 from ..prototype import WikiTextHtml
 
 
 def _render_template(instance: WikiTextHtml, template: wikitextparser.Template):
     name = template.name.strip()
 
-    instance._templates.add(name)
+    try:
+        if not instance.template_exists(name):
+            instance.add_error(f'Template "{name}" does not exist.')
+    except InvalidTemplate as e:
+        # Errors always end with a dot, hence the [:-1].
+        instance.add_error(f'{e.args[0][:-1]} (template "{{{{{name}}}}}").')
+        return
 
-    if not instance.template_exists(name):
-        instance.add_error(f"Template '{name}' does not exist")
+    instance._templates.add(name)
 
     body = instance.template_load(name)
     body = preprocess.begin(instance, body, is_transcluding=True)
