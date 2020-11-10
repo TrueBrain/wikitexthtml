@@ -1,9 +1,8 @@
 import wikitextparser
 
-from collections import defaultdict
 from typing import (
-    Dict,
     List,
+    Set,
 )
 
 from .prototype import WikiTextHtml
@@ -27,8 +26,9 @@ class Page(WikiTextHtml):
     def __init__(self, page: str) -> None:
         self._page = page
         self._snippet = []  # type: List[str]
-        self._templates = defaultdict(int)  # type: Dict[str, int]
+        self._templates = set()  # type: Set[str]
         self._errors = []  # type: List[str]
+        self._template_path = []  # type: List[str]
 
     def prepare(self, body) -> wikitextparser.WikiText:
         body = preprocess.begin(self, body)
@@ -39,7 +39,10 @@ class Page(WikiTextHtml):
 
         parameter.replace(self, wtp, [])
         parser_function.replace(self, wtp)
+
+        assert len(self._template_path) == 0
         template.replace(self, wtp)
+        assert len(self._template_path) == 0
 
         return wikitextparser.parse(wtp.string)
 
@@ -110,7 +113,7 @@ class Page(WikiTextHtml):
 
     @property
     def templates(self):
-        return self._templates.keys()
+        return self._templates
 
     @property
     def errors(self):
