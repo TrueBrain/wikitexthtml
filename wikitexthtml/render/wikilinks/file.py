@@ -13,14 +13,10 @@ from ...prototype import WikiTextHtml
 
 def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
     is_image = False
-    is_media = False
 
     if wikilink.title.lower().startswith("file:"):
         filename = wikilink.title[5:]
         is_image = True
-    elif wikilink.title.lower().startswith("media:"):
-        filename = wikilink.title[6:]
-        is_media = True
     else:
         raise NotImplementedError(f"Unknown wikilink file {wikilink.title}")
 
@@ -137,8 +133,6 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
 
     if not frameless:
         extra_a += ' class="image"'
-    if is_media:
-        extra_a += ' class="internal"'
 
     if frameless:
         extra_a += f' title="{html.escape(title)}"'

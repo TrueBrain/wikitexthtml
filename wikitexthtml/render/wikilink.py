@@ -8,7 +8,6 @@ from ..prototype import WikiTextHtml
 
 WIKILINK_NAMESPACES = {
     "file": file.replace,
-    "media": file.replace,
 }
 
 
