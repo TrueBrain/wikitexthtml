@@ -8,24 +8,24 @@ from ...prototype import WikiTextHtml
 
 def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
     url = wikilink.title.strip()
+
+    text = ""
+    # Always run clean_title() on the URL, as it detects URLs that are invalid
+    # because of invalid namespaces, etc.
     if url:
         try:
-            title = instance.clean_title(url)
+            text = instance.clean_title(url)
         except InvalidWikiLink as e:
             # Errors always end with a dot, hence the [:-1].
             instance.add_error(f'{e.args[0][:-1]} (wikilink "{wikilink.string}").')
             return
-    else:
-        title = ""
 
-    if wikilink.text is None:
-        text = title
-        if wikilink.fragment:
-            text += f"#{wikilink.fragment}"
-    else:
+    if wikilink.text:
         text = wikilink.text.strip()
+    elif wikilink.fragment:
+        text += f"#{wikilink.fragment}"
 
-    title = html.escape(title)
+    title = html.escape(wikilink.target)
     text = html.escape(text)
 
     if url == instance._page and not wikilink.fragment:
