@@ -19,6 +19,7 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
             # Errors always end with a dot, hence the [:-1].
             instance.add_error(f'{e.args[0][:-1]} (wikilink "{wikilink.string}").')
             return
+        text = html.escape(text)
 
     if wikilink.text:
         text = wikilink.text.strip()
@@ -26,7 +27,6 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
         text += f"#{wikilink.fragment}"
 
     title = html.escape(wikilink.target)
-    text = html.escape(text)
 
     if url == instance._page and not wikilink.fragment:
         wikilink.string = f'<strong class="selflink">{text}</strong>'
