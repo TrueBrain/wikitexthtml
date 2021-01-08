@@ -163,8 +163,7 @@ def replace(instance: WikiTextHtml, wikitext: wikitextparser.WikiText):
             title = section.title.strip()
 
             content = f"<h{section.level}>"
-            content += f'<a class="anchor" id="{slug}" href="#{slug}"></a>'
-            content += f'<a name="{slug}" id="{slug}"></a>'
+            content += f'<a class="anchor" href="#{slug}"></a>'
             content += f'<span class="mw-headline" id="{slug}">{title}</span>'
             content += f"</h{section.level}>\n"
         else:
