@@ -49,6 +49,10 @@ class Page(WikiTextHtml):
     def render_page(self, wtp: wikitextparser.WikiText) -> str:
         tag.call_hooks(self, wtp)
 
+        # We reload the parser, as some tags are also processed by
+        # wikitextparser (while we just removed them).
+        wtp = wikitextparser.parse(wtp.string)
+
         # Order is important. Lists inside tables will be rendered by the
         # tables; all other lists are rendered after that.
         table.replace(self, wtp)
