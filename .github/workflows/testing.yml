@@ -75,3 +75,19 @@ jobs:
       run: python -m pip install pytest
     - name: Run pytest
       run: pytest
+
+  check_annotations:
+    name: Check Annotations
+    needs:
+    - flake8
+    - black
+    - pytest
+    # not codeql, as that reports its own status
+
+    if: always() && github.event_name == 'pull_request'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check annotations
+      uses: OpenTTD/actions/annotation-check@v2
