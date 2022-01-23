@@ -67,11 +67,16 @@ def toc(instance: WikiTextHtml, wikitext: wikitextparser.WikiText) -> str:
     skipped_levels = []
     toc_level = 0
     toc_number = []
+    slugs = defaultdict(int)  # type: Dict[str, int]
     for section in wikitext.get_sections():
         if not section or not section.title:
             continue
 
         slug = _slugify(section.title)
+        slugs[slug] += 1
+        if slugs[slug] != 1:
+            slug += f"_{slugs[slug]}"
+
         title = section.title.strip()
         title = _remove_known_tags(title)
         current_level = section.level
