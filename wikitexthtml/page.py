@@ -30,8 +30,13 @@ class Page(WikiTextHtml):
         self._errors = []  # type: List[str]
         self._template_path = []  # type: List[str]
 
-    def prepare(self, body) -> wikitextparser.WikiText:
+    def prepare(self, body, enable_syntax_highlight=False) -> wikitextparser.WikiText:
         body = preprocess.begin(self, body)
+        if enable_syntax_highlight:
+            body = preprocess.highlight_syntax(self, body)
+        else:
+            body = preprocess.replace_syntax_highlight_with_pre(self, body)
+
         body = preprocess.pre_block(self, body)
         body = preprocess.hr_line(self, body)
 

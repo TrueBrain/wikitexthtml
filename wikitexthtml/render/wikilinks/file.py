@@ -90,11 +90,26 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                 if "x" in option:
                     width, _, height = option.partition("x")
                     if width:
-                        options["width"] = int(width)
-                    options["height"] = int(height)
+                        if not width.isnumeric():
+                            instance.add_error(
+                                f'Image "{wikilink.title}" sets width attribute but this is not a number: {width}.'
+                            )
+                        else:
+                            options["width"] = int(width)
+                    if not height.isnumeric():
+                        instance.add_error(
+                            f'Image "{wikilink.title}" sets height attribute but this is not a number: {height}.'
+                        )
+                    else:
+                        options["height"] = int(height)
                 else:
                     width = option
-                    options["width"] = int(width)
+                    if not width.isnumeric():
+                        instance.add_error(
+                            f'Image "{wikilink.title}" sets width attribute but this is not a number: {width}.'
+                        )
+                    else:
+                        options["width"] = int(width)
             elif option.startswith("link="):
                 options["link"] = option[5:]
                 options["title"] = option[5:]

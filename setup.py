@@ -19,8 +19,9 @@ setuptools.setup(
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.8',
+    python_requires=">=3.8",
     install_requires=[
+        "pygments",
         "python-slugify",
         "ply",
         "wikitextparser",
