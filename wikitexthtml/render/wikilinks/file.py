@@ -89,12 +89,14 @@ def replace(instance: WikiTextHtml, wikilink: wikitextparser.WikiLink):
                 option = option[:-2]
                 if "x" in option:
                     width, _, height = option.partition("x")
-                    if width:
+                    if width and width.isnumeric():
                         options["width"] = int(width)
-                    options["height"] = int(height)
+                    if height.isnumeric():
+                        options["height"] = int(height)
                 else:
                     width = option
-                    options["width"] = int(width)
+                    if width.isnumeric():
+                        options["width"] = int(width)
             elif option.startswith("link="):
                 options["link"] = option[5:]
                 options["title"] = option[5:]
