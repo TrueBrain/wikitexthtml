@@ -1,8 +1,8 @@
-from tokenize import group
 import regex
 import wikitextparser
 
-from pygments import highlight, ClassNotFound
+from pygments import highlight
+from pygments.util import ClassNotFound
 from pygments.lexers import guess_lexer, get_lexer_by_name
 from pygments.formatters import HtmlFormatter
 
@@ -18,7 +18,8 @@ NOWIKI_PATTERN = regex.compile(r"<nowiki>([\s\S]*?)(?></nowiki>|\Z)")
 ONLYINCLUDE_PATTERN = regex.compile(r"<onlyinclude>([\s\S]*?)(?></onlyinclude>|\Z)")
 PRE_PATTERN = regex.compile(r"<pre>([\s\S]*?)(?></pre>|\Z)")
 SYNTAXHIGHLIGHT_PATTERN = regex.compile(
-    r"""<syntaxhighlight( lang=")?(?P<lang>[a-zA-z]+)?"?(?P<line> line(?P<lineStart> \d*)?)?>(?P<code>[\s\S]*?)(?></syntaxhighlight>|\Z)"""
+    r"<syntaxhighlight( lang=\")?(?P<lang>[a-zA-z]+)?\"?"
+    r"(?P<line> line(?P<lineStart> \d*)?)?>(?P<code>[\s\S]*?)(?></syntaxhighlight>|\Z)"
 )
 
 
@@ -97,16 +98,30 @@ def highlight_syntax(instance: WikiTextHtml, body: str) -> str:
         line_start = int(match.group("lineStart")) if match.group("lineStart") else 1
         content = match.group("code")
 
-        if lang:
-            # If language was provided, use that lexer.
+        try:
+            # Try to find a lexer based on the text captured by the 'lang' group.
             lexer = get_lexer_by_name(lang)
-        else:
-            # Otherwise, select the lexer best matching the code.
-            lexer = guess_lexer(content)
+        except ClassNotFound:
+            # Either there was no language specified, or the language is not supported by Pygments.
+            try:
+                lexer = guess_lexer(content)
+                if lang:
+                    instance.add_error(
+                        f"Syntax highlighting: unknown language '{lang}'. (Using best guess: {lexer.name})"
+                    )
+                else:
+                    instance.add_error(f"Syntax highlighting: language not specified. (Using best guess: {lexer.name})")
+            except ClassNotFound:
+                lexer = None
+                instance.add_error("Syntax highlighting: unable to guess language, will render without highlighting.")
 
-        content = highlight(
-            content, lexer, HtmlFormatter(linenos=line_boolean, linenostart=line_start, cssclass="syntaxhighlight")
-        )
+        if lexer:
+            content = highlight(
+                content, lexer, HtmlFormatter(linenos=line_boolean, linenostart=line_start, cssclass="syntaxhighlight")
+            )
+        else:
+            # At this point, fall back to unformatted <pre> blocks.
+            content = "<pre>{}</pre>".format(_html_escape(content))
 
         index = instance.store_snippet(content)
         start, end = match.span()
