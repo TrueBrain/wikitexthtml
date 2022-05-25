@@ -1,6 +1,11 @@
 import regex
 import wikitextparser
 
+from pygments import highlight
+from pygments.util import ClassNotFound
+from pygments.lexers import guess_lexer, get_lexer_by_name
+from pygments.formatters import HtmlFormatter
+
 from . import bold_and_italic
 from .config import VALID_TAGS
 from ..prototype import WikiTextHtml
@@ -12,6 +17,10 @@ NOWIKI_IN_PRE_PATTERN = regex.compile(r"<pre>\s*<nowiki>([\s\S]*?)<\/nowiki>\s*<
 NOWIKI_PATTERN = regex.compile(r"<nowiki>([\s\S]*?)(?></nowiki>|\Z)")
 ONLYINCLUDE_PATTERN = regex.compile(r"<onlyinclude>([\s\S]*?)(?></onlyinclude>|\Z)")
 PRE_PATTERN = regex.compile(r"<pre>([\s\S]*?)(?></pre>|\Z)")
+SYNTAXHIGHLIGHT_PATTERN = regex.compile(
+    r"<syntaxhighlight( lang=\")?(?P<lang>[a-zA-z]+)?\"?"
+    r"(?P<line> line(?P<lineStart> \d*)?)?>(?P<code>[\s\S]*?)(?></syntaxhighlight>|\Z)"
+)
 
 
 def _html_escape(body: str) -> str:
@@ -19,7 +28,7 @@ def _html_escape(body: str) -> str:
     return body.replace("<", "&lt;").replace(">", "&gt;")
 
 
-def begin(instance: WikiTextHtml, body: str, is_transcluding: bool = False):
+def begin(instance: WikiTextHtml, body: str, is_transcluding: bool = False) -> str:
     # <onlyinclude> content is kept if we are transcluding, before any other
     # preprocessing is done (https://www.mediawiki.org/wiki/Transclusion).
     if "<onlyinclude>" in body:
@@ -71,6 +80,62 @@ def begin(instance: WikiTextHtml, body: str, is_transcluding: bool = False):
 
 def hr_line(instance: WikiTextHtml, body: str) -> str:
     return regex.sub(r"\n----+\n", r"\n\n<hr />\n", body)
+
+
+def highlight_syntax(instance: WikiTextHtml, body: str) -> str:
+    # Use Pygments to generate highlighted code blocks.
+
+    # The SYNTAXHIGHLIGHT_PATTERN Generates 6 groups:
+    #   The first group (match[0]) is the entire match.
+    #   The third group ('lang') is the language.
+    #   The fourth group ('line') is a boolean to specify line numbering.
+    #   The fifth group ('linestart') is the line number to start at.
+    #   The sixth group ('code') is the code to highlight.
+
+    for match in reversed(list(SYNTAXHIGHLIGHT_PATTERN.finditer(body))):
+        lang = match.group("lang")
+        line_boolean = True if match.group("line") else False
+        line_start = int(match.group("lineStart")) if match.group("lineStart") else 1
+        content = match.group("code")
+
+        try:
+            # Try to find a lexer based on the text captured by the 'lang' group.
+            lexer = get_lexer_by_name(lang)
+        except ClassNotFound:
+            # Either there was no language specified, or the language is not supported by Pygments.
+            try:
+                lexer = guess_lexer(content)
+                if lang:
+                    instance.add_error(
+                        f"Syntax highlighting: unknown language '{lang}'. (Using best guess: {lexer.name})"
+                    )
+                else:
+                    instance.add_error(f"Syntax highlighting: language not specified. (Using best guess: {lexer.name})")
+            except ClassNotFound:
+                lexer = None
+                instance.add_error("Syntax highlighting: unable to guess language, will render without highlighting.")
+
+        if lexer:
+            content = highlight(
+                content, lexer, HtmlFormatter(linenos=line_boolean, linenostart=line_start, cssclass="syntaxhighlight")
+            )
+        else:
+            # At this point, fall back to unformatted <pre> blocks.
+            content = "<pre>{}</pre>".format(_html_escape(content))
+
+        index = instance.store_snippet(content)
+        start, end = match.span()
+
+        # Re-insert formatted block.
+        body = body[:start] + "{{" + f"__snippet|post|{index}|syntaxhighlight" + "}}" + body[end:]
+
+    return body
+
+
+def replace_syntax_highlight_with_pre(instance: WikiTextHtml, body: str) -> str:
+    # If we don't want to color the syntax, remove all <syntaxhighlight> tags
+    # and replace them with <pre> tags.
+    return SYNTAXHIGHLIGHT_PATTERN.sub(r"<pre>\g<code></pre>", body)
 
 
 def pre_block(instance: WikiTextHtml, body: str) -> str:
