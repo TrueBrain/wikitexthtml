@@ -31,12 +31,12 @@ class Page(WikiTextHtml):
         self._template_path = []  # type: List[str]
 
     def prepare(self, body, enable_syntax_highlight=False) -> wikitextparser.WikiText:
-        body = preprocess.begin(self, body)
         if enable_syntax_highlight:
             body = preprocess.highlight_syntax(self, body)
         else:
             body = preprocess.replace_syntax_highlight_with_pre(self, body)
 
+        body = preprocess.begin(self, body)
         body = preprocess.pre_block(self, body)
         body = preprocess.hr_line(self, body)
 
@@ -88,9 +88,9 @@ class Page(WikiTextHtml):
 
         return postprocess.replace(self, wtp.string)
 
-    def render(self, body: str = None) -> "Page":
+    def render(self, body: str = None, enable_syntax_highlight=False) -> "Page":
         body = self.page_load(self._page)
-        wtp = self.prepare(body)
+        wtp = self.prepare(body, enable_syntax_highlight)
         self._html = self.render_page(wtp)
         return self
 
