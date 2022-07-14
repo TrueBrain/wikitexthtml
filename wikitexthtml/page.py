@@ -88,9 +88,9 @@ class Page(WikiTextHtml):
 
         return postprocess.replace(self, wtp.string)
 
-    def render(self, body: str = None) -> "Page":
+    def render(self, body: str = None, enable_syntax_highlight=False) -> "Page":
         body = self.page_load(self._page)
-        wtp = self.prepare(body)
+        wtp = self.prepare(body, enable_syntax_highlight)
         self._html = self.render_page(wtp)
         return self
 

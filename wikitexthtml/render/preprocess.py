@@ -18,8 +18,9 @@ NOWIKI_PATTERN = regex.compile(r"<nowiki>([\s\S]*?)(?></nowiki>|\Z)")
 ONLYINCLUDE_PATTERN = regex.compile(r"<onlyinclude>([\s\S]*?)(?></onlyinclude>|\Z)")
 PRE_PATTERN = regex.compile(r"<pre>([\s\S]*?)(?></pre>|\Z)")
 SYNTAXHIGHLIGHT_PATTERN = regex.compile(
-    r"<syntaxhighlight( lang=\")?(?P<lang>[^\"]+)?\"?"
-    r"(?P<line> line(?P<lineStart> \d*)?)?>(?P<code>[\s\S]*?)(?></syntaxhighlight>|\Z)"
+    r"<syntaxhighlight( lang=\"(?P<lang>[^\"]+)\")?"
+    r"(?P<line> line( start=\"(?P<lineStart>\d+)\")?)?>"
+    r"(?P<code>[\s\S]*?)(</syntaxhighlight>|\Z)"
 )
 
 
