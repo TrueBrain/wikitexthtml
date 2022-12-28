@@ -4,8 +4,8 @@
 [![GitHub Tag](https://img.shields.io/github/v/tag/TrueBrain/wikitexthtml?include_prereleases&label=stable)](https://github.com/TrueBrain/wikitexthtml/releases)
 [![GitHub commits since latest release](https://img.shields.io/github/commits-since/TrueBrain/wikitexthtml/latest/main)](https://github.com/TrueBrain/wikitexthtml/commits/main)
 
-[![GitHub Workflow Status (Testing)](https://img.shields.io/github/workflow/status/TrueBrain/wikitexthtml/Testing/main?label=main)](https://github.com/TrueBrain/wikitexthtml/actions?query=workflow%3ATesting)
-[![GitHub Workflow Status (Release)](https://img.shields.io/github/workflow/status/TrueBrain/wikitexthtml/Release?label=release)](https://github.com/TrueBrain/wikitexthtml/actions?query=workflow%3A%22Release%22)
+[![GitHub Workflow Status (Testing)](https://img.shields.io/github/actions/workflow/status/TrueBrain/wikitexthtml/testing.yml?branch=main&label=main)](https://github.com/TrueBrain/wikitexthtml/actions/workflows/testing.yml)
+[![GitHub Workflow Status (Release)](https://img.shields.io/github/actions/workflow/status/TrueBrain/wikitexthtml/release.yml?label=release)](https://github.com/TrueBrain/wikitexthtml/actions/workflows/release.yml)
 
 wikitexthtml is a library that renders HTML from WikiText.
 
