@@ -2,14 +2,17 @@ import datetime
 import html
 import wikitextparser
 
-from .exceptions import ParserFunctionWrongArgumentCount
 from ...exceptions import InvalidWikiLink
 from ...prototype import WikiTextHtml
 
 
 def variable(instance: WikiTextHtml, parser_function: wikitextparser.ParserFunction):
     if len(parser_function.arguments) != 0:
-        raise ParserFunctionWrongArgumentCount
+        instance.add_error(
+            f'Parser function "{parser_function.name}" expects no arguments, '
+            f"but {len(parser_function.arguments)} given."
+        )
+        return
 
     name = parser_function.name.lower()
     if name == "currentyear":
